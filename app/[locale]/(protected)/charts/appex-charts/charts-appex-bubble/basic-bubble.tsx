@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { colors } from "@/lib/colors";
 import { useTheme } from "next-themes";
-import { hexToRGB } from "@/lib/utils";
 import { useConfig } from "@/hooks/use-config";
 import {
   getGridConfig,
@@ -19,21 +18,26 @@ const BasicBubble = ({ height = 350 }) => {
     min: number;
     max: number;
   }
-  function generateData(baseval: number, count: number, yrange: DataRange) {
-    var i = 0;
-    var series: [number, number, number][] = [];
-    while (i < count) {
-      var x = Math.floor(Math.random() * (750 - 1 + 1)) + 1;
-      var y =
-        Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-      var z = Math.floor(Math.random() * (75 - 15 + 1)) + 15;
 
-      series.push([x, y, z]);
+  // ✅ FIX: return {x, y, z} instead of [x, y, z]
+  function generateData(baseval: number, count: number, yrange: DataRange) {
+    let i = 0;
+    const series: { x: number; y: number; z: number }[] = [];
+
+    while (i < count) {
+      const x = Math.floor(Math.random() * (750 - 1 + 1)) + 1;
+      const y =
+        Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+      const z = Math.floor(Math.random() * (75 - 15 + 1)) + 15;
+
+      series.push({ x, y, z }); // ✅ Use object format
       baseval += 86400000;
       i++;
     }
+
     return series;
   }
+
   const series = [
     {
       name: "Bubble1",
@@ -81,12 +85,7 @@ const BasicBubble = ({ height = 350 }) => {
       curve: "smooth",
       width: 4,
     },
-    colors: [
-      colors.primary,
-      colors.info,
-      colors.primary,
-      colors.success,
-    ],
+    colors: [colors.primary, colors.info, colors.primary, colors.success],
     tooltip: {
       theme: mode === "dark" ? "dark" : "light",
     },
@@ -96,7 +95,6 @@ const BasicBubble = ({ height = 350 }) => {
         horizontal: true,
       },
     },
-
     xaxis: {
       axisBorder: {
         show: false,
@@ -104,14 +102,17 @@ const BasicBubble = ({ height = 350 }) => {
       axisTicks: {
         show: false,
       },
-      labels: getLabel(mode === 'light' ? colors["default-600"] : colors["default-300"]),
+      labels: getLabel(
+        mode === "light" ? colors["default-600"] : colors["default-300"]
+      ),
     },
     yaxis: getYAxisConfig(
-      mode === 'light' ? colors["default-600"] : colors["default-300"]
+      mode === "light" ? colors["default-600"] : colors["default-300"]
     ),
     legend: {
       labels: {
-        colors: mode === 'light' ? colors["default-600"] : colors["default-300"],
+        colors:
+          mode === "light" ? colors["default-600"] : colors["default-300"],
       },
       itemMargin: {
         horizontal: 5,
@@ -121,16 +122,17 @@ const BasicBubble = ({ height = 350 }) => {
         width: 10,
         height: 10,
         radius: 10,
-        offsetX: config.isRtl ? 5 : -5
-      }
+        offsetX: config.isRtl ? 5 : -5,
+      },
     },
     padding: {
       top: 0,
       right: 0,
       bottom: 0,
       left: 0,
-    }
+    },
   };
+
   return (
     <Chart
       options={options}
